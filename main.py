@@ -38,3 +38,7 @@ def create_product(product: ProductCreate):
     next_id += 1
 
     return new_product
+
+@app.get("/products")
+def get_products():
+    return list(products.values())
