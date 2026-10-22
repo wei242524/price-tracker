@@ -1,7 +1,11 @@
 from decimal import Decimal
 from fastapi import FastAPI , HTTPException
 from pydantic import BaseModel, Field, HttpUrl
+import models
+from database import Base, engine
 
+
+Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
