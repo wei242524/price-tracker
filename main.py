@@ -1,13 +1,12 @@
 from decimal import Decimal
 
-from fastapi import Depends, FastAPI , HTTPException
-from pydantic import BaseModel, ConfigDict , Field, HttpUrl
+from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 import models
 from database import Base, engine, get_db
-
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -36,16 +35,13 @@ class ProductUpdate(BaseModel):
 class ProductResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
-    url: HttpUrl
+    url: str
     target_price: Decimal
 
 
 @app.post("/products", status_code=201, response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
-    db_product = models.Product(
-        url=str(product.url), 
-        target_price=product.target_price
-        )
+    db_product = models.Product(url=str(product.url), target_price=product.target_price)
 
     db.add(db_product)
     db.commit()
@@ -56,14 +52,13 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 
 @app.get("/products", response_model=list[ProductResponse])
 def get_products(db: Session = Depends(get_db)):
-
     return db.scalars(select(models.Product)).all()
 
 
 @app.get("/products/{product_id}", response_model=ProductResponse)
 def get_product(product_id: int, db: Session = Depends(get_db)):
     product = db.scalar(select(models.Product).where(models.Product.id == product_id))
-    if not product:
+    if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
@@ -76,13 +71,11 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
     db.delete(product)
     db.commit()
 
-    return None
-
 
 @app.patch("/products/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, 
-                   product_update: ProductUpdate, 
-                   db: Session = Depends(get_db)):
+def update_product(
+    product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)
+):
     product = db.scalar(select(models.Product).where(models.Product.id == product_id))
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
