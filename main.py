@@ -3,6 +3,7 @@ from decimal import Decimal
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import models
@@ -29,7 +30,9 @@ class ProductCreate(BaseModel):
 
 class ProductUpdate(BaseModel):
     url: HttpUrl | None = None
-    target_price: Decimal | None = Field(default=None, gt=0, max_digits=10, decimal_places=2)
+    target_price: Decimal | None = Field(
+        default=None, gt=0, max_digits=10, decimal_places=2
+    )
 
 
 class ProductResponse(BaseModel):
@@ -44,7 +47,13 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     db_product = models.Product(url=str(product.url), target_price=product.target_price)
 
     db.add(db_product)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409, detail="Product with this URL already exists"
+        )
     db.refresh(db_product)
 
     return db_product
@@ -85,7 +94,13 @@ def update_product(
     if product_update.target_price is not None:
         product.target_price = product_update.target_price
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409, detail="Product with this URL already exists"
+        )
     db.refresh(product)
 
     return product

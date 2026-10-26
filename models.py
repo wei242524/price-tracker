@@ -10,5 +10,5 @@ class Product(Base):
     __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    url: Mapped[str] = mapped_column(String(2048), nullable=False)
+    url: Mapped[str] = mapped_column(String(2048), nullable=False, unique=True)
     target_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
