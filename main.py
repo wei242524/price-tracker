@@ -88,6 +88,7 @@ def update_product(
     product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)
 ):
     product = get_product_or_404(product_id, db)
+    
     if product_update.url is not None:
         product.url = str(product_update.url)
     if product_update.target_price is not None:
