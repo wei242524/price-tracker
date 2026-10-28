@@ -42,6 +42,13 @@ class ProductResponse(BaseModel):
     target_price: Decimal
 
 
+def get_product_or_404(product_id: int, db: Session) -> models.Product:
+    product = db.get(models.Product, product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+
 @app.post("/products", status_code=201, response_model=ProductResponse)
 def create_product(product: ProductCreate, db: Session = Depends(get_db)):
     db_product = models.Product(url=str(product.url), target_price=product.target_price)
@@ -66,17 +73,12 @@ def get_products(db: Session = Depends(get_db)):
 
 @app.get("/products/{product_id}", response_model=ProductResponse)
 def get_product(product_id: int, db: Session = Depends(get_db)):
-    product = db.scalar(select(models.Product).where(models.Product.id == product_id))
-    if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
+    return get_product_or_404(product_id, db)
 
 
 @app.delete("/products/{product_id}", status_code=204)
 def delete_product(product_id: int, db: Session = Depends(get_db)):
-    product = db.scalar(select(models.Product).where(models.Product.id == product_id))
-    if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = get_product_or_404(product_id, db)
     db.delete(product)
     db.commit()
 
@@ -85,10 +87,8 @@ def delete_product(product_id: int, db: Session = Depends(get_db)):
 def update_product(
     product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)
 ):
-    product = db.scalar(select(models.Product).where(models.Product.id == product_id))
-    if product is None:
-        raise HTTPException(status_code=404, detail="Product not found")
-
+    product = get_product_or_404(product_id, db)
+    
     if product_update.url is not None:
         product.url = str(product_update.url)
     if product_update.target_price is not None:
