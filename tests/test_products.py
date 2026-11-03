@@ -6,10 +6,7 @@ def create_product(client, url="https://example.com/item", target_price="19.99")
 
 
 def test_create_product(client):
-    response = client.post(
-        "/products",
-        json={"url": "https://example.com/item", "target_price": "19.99"},
-    )
+    response = create_product(client)
     assert response.status_code == 201
     data = response.json()
     assert data["url"] == "https://example.com/item"
@@ -74,6 +71,7 @@ def test_get_product(client):
     create_response = create_product(
         client, url="https://example.com/item", target_price="19.99"
     )
+    assert create_response.status_code == 201
     product_id = create_response.json()["id"]
 
     response = client.get(f"/products/{product_id}")
