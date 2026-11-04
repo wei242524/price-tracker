@@ -88,11 +88,15 @@ def update_product(
     product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)
 ):
     product = get_product_or_404(product_id, db)
+    update_data = product_update.model_dump(exclude_unset=True)
 
-    if product_update.url is not None:
-        product.url = str(product_update.url)
-    if product_update.target_price is not None:
-        product.target_price = product_update.target_price
+    if None in update_data.values():
+        raise HTTPException(status_code=422, detail="Null values are not allowed")
+    if "url" in update_data:
+        update_data["url"] = str(update_data["url"])
+
+    for field, value in update_data.items():
+        setattr(product, field, value)
 
     try:
         db.commit()
