@@ -1,13 +1,11 @@
-from decimal import Decimal
-
 from fastapi import Depends, FastAPI, HTTPException
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import app.models as models
 from app.database import Base, engine, get_db
+from app.schemas import ProductCreate, ProductResponse, ProductUpdate
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -21,25 +19,6 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-
-class ProductCreate(BaseModel):
-    url: HttpUrl
-    target_price: Decimal = Field(gt=0, max_digits=10, decimal_places=2)
-
-
-class ProductUpdate(BaseModel):
-    url: HttpUrl | None = None
-    target_price: Decimal | None = Field(
-        default=None, gt=0, max_digits=10, decimal_places=2
-    )
-
-
-class ProductResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    id: int
-    url: str
-    target_price: Decimal
 
 
 def get_product_or_404(product_id: int, db: Session) -> models.Product:
