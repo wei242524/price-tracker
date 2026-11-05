@@ -3,7 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-import app.models as models
+from app import models
 from app.database import Base, engine, get_db
 from app.schemas import ProductCreate, ProductResponse, ProductUpdate
 
