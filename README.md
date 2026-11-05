@@ -19,10 +19,20 @@ cd price-tracker
 python -m venv .venv
 .venv\Scripts\activate        # macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
-uvicorn main:app --reload
+uvicorn app.main:app --reload
 ```
 
 Then open http://127.0.0.1:8000/docs to try the API in the browser.
+
+
+## Configuration
+
+Settings are read from environment variables. See `.env.example` for the full list.
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_URL` | `sqlite:///./price_tracker.db` | Database connection string |
+
 
 ## API
 
