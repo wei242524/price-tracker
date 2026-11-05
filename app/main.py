@@ -6,8 +6,8 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-import models
-from database import Base, engine, get_db
+import app.models as models
+from app.database import Base, engine, get_db
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
