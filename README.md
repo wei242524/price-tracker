@@ -8,7 +8,7 @@ A backend service that lets users track product prices and get notified when a p
 
 - **Language & framework:** Python, FastAPI
 - **Database:** SQLAlchemy 2.0 with SQLite or PostgreSQL, Alembic migrations
-- **Infrastructure:** Docker Compose
+- **Infrastructure:** Docker, Docker Compose
 - **Validation:** Pydantic
 - **Dev tooling:** ruff (formatting), pytest (testing)
 
@@ -26,12 +26,22 @@ uvicorn app.main:app --reload
 
 Then open http://127.0.0.1:8000/docs to try the API in the browser.
 
-### Using PostgreSQL
+### Using Docker
 
-The app uses SQLite by default. To run it against PostgreSQL instead, start the database with Docker Compose and point `DATABASE_URL` at it:
+To run the app and PostgreSQL together without installing Python, use Docker Compose:
 
 ```bash
-docker compose up -d
+docker compose up --build
+```
+
+Then open http://localhost:8000/docs. Migrations run automatically when the app starts.
+
+### Using PostgreSQL
+
+To develop with `--reload` against PostgreSQL, start only the database with Docker Compose and point `DATABASE_URL` at it:
+
+```bash
+docker compose up -d db
 $env:DATABASE_URL = "postgresql+psycopg://price_tracker:price_tracker@localhost:5432/price_tracker"   # macOS/Linux: export DATABASE_URL=...
 python -m alembic upgrade head
 uvicorn app.main:app --reload
