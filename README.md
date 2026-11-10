@@ -7,7 +7,7 @@ A backend service that lets users track product prices and get notified when a p
 ## Tech stack
 
 - **Language & framework:** Python, FastAPI
-- **Database:** SQLAlchemy 2.0 with SQLite or PostgreSQL (Alembic planned)
+- **Database:** SQLAlchemy 2.0 with SQLite or PostgreSQL, Alembic migrations
 - **Infrastructure:** Docker Compose
 - **Validation:** Pydantic
 - **Dev tooling:** ruff (formatting), pytest (testing)
@@ -20,6 +20,7 @@ cd price-tracker
 python -m venv .venv
 .venv\Scripts\activate        # macOS/Linux: source .venv/bin/activate
 pip install -r requirements-dev.txt
+python -m alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
@@ -32,12 +33,22 @@ The app uses SQLite by default. To run it against PostgreSQL instead, start the 
 ```bash
 docker compose up -d
 $env:DATABASE_URL = "postgresql+psycopg://price_tracker:price_tracker@localhost:5432/price_tracker"   # macOS/Linux: export DATABASE_URL=...
+python -m alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
 Data is stored in a Docker volume, so it survives `docker compose down`. Use `docker compose down -v` to delete it.
 
 Tests always use an in-memory SQLite database, so they don't need Docker.
+
+### Database migrations
+
+The database schema is managed with Alembic. After changing a model in `app/models.py`, generate a migration and review it before applying:
+
+```bash
+python -m alembic revision --autogenerate -m "Describe the change"
+python -m alembic upgrade head
+```
 
 ## Configuration
 

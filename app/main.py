@@ -4,10 +4,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.database import Base, engine, get_db
+from app.database import get_db
 from app.schemas import ProductCreate, ProductResponse, ProductUpdate
 
-Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
