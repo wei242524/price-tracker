@@ -1,5 +1,7 @@
 # Price Tracker
 
+[![CI](https://github.com/wei242524/price-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/wei242524/price-tracker/actions/workflows/ci.yml)
+
 A backend service that lets users track product prices and get notified when a price drops below their target.
 
 > **Status:** Work in progress. Managing tracked products (CRUD API with validation) is done. Price scraping, scheduled checks, price history and email notifications are planned.
