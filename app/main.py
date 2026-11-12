@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +10,8 @@ from app.database import get_db
 from app.schemas import ProductCreate, ProductResponse, ProductUpdate
 
 app = FastAPI()
+
+DbSession = Annotated[Session, Depends(get_db)]
 
 
 @app.get("/")
@@ -28,7 +32,7 @@ def get_product_or_404(product_id: int, db: Session) -> models.Product:
 
 
 @app.post("/products", status_code=201, response_model=ProductResponse)
-def create_product(product: ProductCreate, db: Session = Depends(get_db)):
+def create_product(product: ProductCreate, db: DbSession):
     db_product = models.Product(url=str(product.url), target_price=product.target_price)
 
     db.add(db_product)
@@ -45,26 +49,24 @@ def create_product(product: ProductCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/products", response_model=list[ProductResponse])
-def get_products(db: Session = Depends(get_db)):
+def get_products(db: DbSession):
     return db.scalars(select(models.Product)).all()
 
 
 @app.get("/products/{product_id}", response_model=ProductResponse)
-def get_product(product_id: int, db: Session = Depends(get_db)):
+def get_product(product_id: int, db: DbSession):
     return get_product_or_404(product_id, db)
 
 
 @app.delete("/products/{product_id}", status_code=204)
-def delete_product(product_id: int, db: Session = Depends(get_db)):
+def delete_product(product_id: int, db: DbSession):
     product = get_product_or_404(product_id, db)
     db.delete(product)
     db.commit()
 
 
 @app.patch("/products/{product_id}", response_model=ProductResponse)
-def update_product(
-    product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)
-):
+def update_product(product_id: int, product_update: ProductUpdate, db: DbSession):
     product = get_product_or_404(product_id, db)
     update_data = product_update.model_dump(exclude_unset=True)
 
