@@ -4,11 +4,15 @@ A backend service that lets users track product prices and get notified when a p
 
 > **Status:** Work in progress. Managing tracked products (CRUD API with validation) is done. Price scraping, scheduled checks, price history and email notifications are planned.
 
+**Live demo:** https://price-tracker-0ui1.onrender.com/docs
+
+> Hosted on Render's free tier, so the first request after 15 minutes of inactivity can take about a minute while the service wakes up.
+
 ## Tech stack
 
 - **Language & framework:** Python, FastAPI
 - **Database:** SQLAlchemy 2.0 with SQLite or PostgreSQL, Alembic migrations
-- **Infrastructure:** Docker, Docker Compose
+- **Infrastructure:** Docker, Docker Compose, Render (hosting), Neon (managed PostgreSQL)
 - **Validation:** Pydantic
 - **Dev tooling:** ruff (formatting), pytest (testing)
 
@@ -60,6 +64,14 @@ python -m alembic revision --autogenerate -m "Describe the change"
 python -m alembic upgrade head
 ```
 
+## Deployment
+
+The app is deployed on [Render](https://render.com) from the `Dockerfile`, and every merge to `main` deploys automatically. The database is a [Neon](https://neon.com) PostgreSQL instance in the same region (Frankfurt), so the app and database stay close to each other.
+
+Render's free PostgreSQL databases are deleted after 30 days, so the database is hosted on Neon instead, keeping the data separate from the app host.
+
+Migrations run on every start (`alembic upgrade head`). This is safe because the command is idempotent: if the database is already at the latest version, it does nothing.
+
 ## Configuration
 
 Settings are read from environment variables. See `.env.example` for the full list.
@@ -67,6 +79,7 @@ Settings are read from environment variables. See `.env.example` for the full li
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | `sqlite:///./price_tracker.db` | Database connection string |
+| `PORT` | `8000` | Port the server listens on inside the Docker container (set automatically by Render) |
 
 ## API
 
