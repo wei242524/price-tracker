@@ -49,7 +49,7 @@ def create_product(product: ProductCreate, db: DbSession):
 
 
 @app.get("/products", response_model=list[ProductResponse])
-def get_products(db: DbSession):
+def get_products(  db: DbSession  ):
     return db.scalars(select(models.Product)).all()
 
 
