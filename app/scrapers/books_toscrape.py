@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+import httpx2
 from bs4 import BeautifulSoup
 
 
@@ -12,5 +13,12 @@ def parse_price(html: str) -> Decimal:
     tag = soup.select_one(".price_color")
     if tag is None:
         raise PriceNotFoundError("Price element '.price_color' not found in the HTML.")
+
     text = tag.get_text(strip=True)
     return Decimal(text.removeprefix("£"))
+
+
+def fetch_price(url: str) -> Decimal:
+    response = httpx2.get(url, timeout=10.0)
+    response.raise_for_status()
+    return parse_price(response.text)
