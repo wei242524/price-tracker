@@ -13,7 +13,7 @@ def parse_price(html: str) -> Decimal:
     tag = soup.select_one(".price_color")
     if tag is None:
         raise PriceNotFoundError("Price element '.price_color' not found in the HTML.")
-    
+
     text = tag.get_text(strip=True)
     return Decimal(text.removeprefix("£"))
 
