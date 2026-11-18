@@ -30,7 +30,7 @@ def upgrade() -> None:
         sa.Column(
             "checked_at",
             sa.DateTime(timezone=True),
-            server_default=sa.text("now()"),
+            server_default=sa.func.now(),
             nullable=False,
         ),
         sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"),
